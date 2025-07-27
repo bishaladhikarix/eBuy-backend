@@ -1,0 +1,7 @@
+ id |     name      |                        description                         | image |            created_at            
+----+---------------+------------------------------------------------------------+-------+----------------------------------
+  1 | Laptops       | Gaming and business laptops                                |       | 2025-07-27 15:08:44.335079+05:45
+  2 | Graphic Cards | Graphics processing units for gaming and professional work |       | 2025-07-27 15:08:44.335079+05:45
+  3 | Monitors      | Computer displays and monitors                             |       | 2025-07-27 15:08:44.335079+05:45
+(3 rows)
+
