@@ -1,4 +1,5 @@
 import pool from '../config.js';
+import { fuzzyBrandSearch } from '../../utils/fuzzySearch.js';
 
 export const productQueries = {
   // Create product
@@ -58,6 +59,46 @@ export const productQueries = {
       paramCount++;
       query += ` AND p.is_sold = $${paramCount}`;
       values.push(filters.isSold);
+    }
+
+    // Handle fuzzy brand search
+    if (filters.brand_search && filters.fuzzy) {
+      console.log(`🔍 Fuzzy brand search requested for: "${filters.brand_search}"`);
+      
+      // For fuzzy search, get all products first (with other filters applied)
+      query += ' ORDER BY p.created_at DESC';
+      
+      const result = await pool.query(query, values);
+      const allProducts = result.rows;
+      console.log(`📦 Found ${allProducts.length} total products to search through`);
+      
+      // Apply fuzzy brand search
+      const fuzzyResults = fuzzyBrandSearch(allProducts, filters.brand_search, {
+        threshold: 0.25, // Lower threshold for more inclusive results
+        includeScore: true
+      });
+      
+      console.log(`✨ Fuzzy search found ${fuzzyResults.length} matching products`);
+      if (fuzzyResults.length > 0) {
+        console.log(`🏆 Top matches:`, fuzzyResults.slice(0, 3).map(p => `${p.brand} (${p.searchScore}%)`));
+      }
+      
+      // Apply pagination to fuzzy results
+      let products = fuzzyResults;
+      if (filters.offset || filters.limit) {
+        const startIndex = filters.offset || 0;
+        const endIndex = filters.limit ? startIndex + filters.limit : products.length;
+        products = products.slice(startIndex, endIndex);
+        console.log(`📄 Paginated to ${products.length} products (offset: ${startIndex}, limit: ${filters.limit})`);
+      }
+      
+      return products;
+    } else if (filters.brand_search && !filters.fuzzy) {
+      console.log(`🔍 Regular brand search for: "${filters.brand_search}"`);
+      // Regular brand search (partial match)
+      paramCount++;
+      query += ` AND p.brand ILIKE $${paramCount}`;
+      values.push(`%${filters.brand_search}%`);
     }
 
     query += ' ORDER BY p.created_at DESC';

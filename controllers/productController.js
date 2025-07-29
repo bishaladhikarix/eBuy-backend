@@ -59,6 +59,8 @@ export const productController = {
         maxPrice,
         condition,
         search,
+        brand_search,
+        fuzzy,
         isSold,
         page = 1,
         limit = 20
@@ -70,6 +72,8 @@ export const productController = {
         maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
         condition,
         search,
+        brand_search,
+        fuzzy: fuzzy === 'true',
         isSold: isSold !== undefined ? isSold === 'true' : undefined,
         limit: parseInt(limit),
         offset: (parseInt(page) - 1) * parseInt(limit)
